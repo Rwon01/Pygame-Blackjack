@@ -13,10 +13,17 @@ clock = pygame.time.Clock()
 
 #CREATE BUTTONS AND GROUPS
 d = CardImages()
-btn1 = Button(text="HIT").move([200, 100])
-btn2 = Button(text="HIT").move([200, 150])
-buttonGroup = pygame.sprite.Group().add(btn1, btn2)
+btnHit = Button(text="HIT")
+btnDeal = Button(text="DEAL")
+cardtest = Card()
 
+
+btnHit.move([200, 100])
+btnDeal.move([200, 150])
+buttonGroup = pygame.sprite.Group()
+buttonGroup.add(btnHit)
+buttonGroup.add(btnDeal)
+buttonGroup.add(cardtest)
 run = True
 while run:
 
@@ -24,9 +31,12 @@ while run:
 
     #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
-    if btn1.rect.collidepoint(mousePos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            pass
+    if pygame.mouse.get_pressed()[0] == 1:
+        if btnDeal.rect.collidepoint(mousePos):
+            btnDeal.move( [mousePos[0] - btnDeal.rect.w // 2, mousePos[1] - btnDeal.rect.h // 2])
+        if cardtest.rect.collidepoint(mousePos):
+            cardtest.move( [mousePos[0] - cardtest.rect.w // 2, mousePos[1] - cardtest.rect.h // 2])
+
     
 
     screen.fill("dark gray")
@@ -34,6 +44,7 @@ while run:
 
     for button in buttonGroup:
         button.render(screen)
+
     
     pygame.display.flip()
 
