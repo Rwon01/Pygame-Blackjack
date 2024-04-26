@@ -18,16 +18,31 @@ clock = pygame.time.Clock()
 
 #CREATE INSTANCES 
 d = CardImages()
+#CREATE BUTTON
 btnHit = Button(text="HIT")
-btnDeal = Button(text="DEAL")
+btnStand = Button(text="STAND")
+btnDouble = Button(text="DOUBLE")
+btnSplit = Button(text="SPLIT")
+btnSurrender = Button(text="SURRENDER", text_size=18)
+
 cardtest = Card()
 
+#GUI CONST
+POS_X = SCREEN_WIDTH * 0.50 - btnDouble.rect.w // 2
+rect_size = btnDouble.rect.w
 #GUI
-btnHit.move([200, 100])
-btnDeal.move([200, 150])
+btnHit.move([POS_X - 2 * rect_size , SCREEN_HEIGHT - 200])
+btnStand.move([POS_X - 1 * rect_size, SCREEN_HEIGHT - 200])
+btnDouble.move([POS_X, SCREEN_HEIGHT - 200])
+btnSplit.move([POS_X + 1 * rect_size, SCREEN_HEIGHT - 200])
+btnSurrender.move([POS_X + 2* rect_size, SCREEN_HEIGHT - 200])
+
 buttonGroup = pygame.sprite.Group()
+buttonGroup.add(btnStand)
 buttonGroup.add(btnHit)
-buttonGroup.add(btnDeal)
+buttonGroup.add(btnDouble)
+buttonGroup.add(btnSplit)
+buttonGroup.add(btnSurrender)
 buttonGroup.add(cardtest)
 
 
@@ -40,8 +55,8 @@ while run:
     #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
     if pygame.mouse.get_pressed()[0] == 1:
-        if btnDeal.rect.collidepoint(mousePos):
-            btnDeal.move([0,0])
+        if btnStand.rect.collidepoint(mousePos):
+            print(btnStand)
 
 
 
