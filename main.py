@@ -43,7 +43,7 @@ buttonGroup.add(btnHit)
 buttonGroup.add(btnDouble)
 buttonGroup.add(btnSplit)
 buttonGroup.add(btnSurrender)
-buttonGroup.add(cardtest)
+#buttonGroup.add(cardtest)
 
 
 #GAMELOOP
@@ -54,9 +54,8 @@ while run:
 
     #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
-    if pygame.mouse.get_pressed()[0] == 1:
-        if btnStand.rect.collidepoint(mousePos):
-            print(btnStand)
+
+
 
 
 
@@ -65,6 +64,7 @@ while run:
     
     #RENDER ENTITIES
     for button in buttonGroup:
+        button.onClick()
         button.render(screen)
 
     #UPDATE DISPLAY -- KEEP LAST
