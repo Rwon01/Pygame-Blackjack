@@ -3,8 +3,18 @@ import random
 import os
 from Card import Card
 from settings import *
-from CardImages import CardImages
 from Button import Button
+
+def getCardFiles():
+    CARDS_PATH = list()
+    for path in os.listdir('assets\cardsSet'):
+        cardpath = "assets/cardsSet/" + path
+        CARDS_PATH.append(cardpath)
+
+    return CARDS_PATH
+
+
+
 
 #BOILERPLATE FOR PYGAME
 pygame.init()
@@ -17,7 +27,7 @@ pygame.display.set_caption("Blackjack Game")
 clock = pygame.time.Clock()
 
 #CREATE INSTANCES 
-d = CardImages()
+
 #CREATE BUTTON
 btnHit = Button(text="HIT")
 btnStand = Button(text="STAND")
@@ -55,16 +65,14 @@ while run:
     #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
 
-
-
-
-
     #BACKGROUND
     screen.fill("dark gray")
     
-    #RENDER ENTITIES
+    #BUTTON LOOP
     for button in buttonGroup:
-        button.onClick()
+        test_value = button.onClick()
+        if test_value == "STAND": print("STAND")
+        if test_value == "HIT": print("HIT")
         button.render(screen)
 
     #UPDATE DISPLAY -- KEEP LAST
