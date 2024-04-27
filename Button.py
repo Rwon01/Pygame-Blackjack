@@ -29,6 +29,7 @@ class Button(pygame.sprite.Sprite):
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
                 self.textFont = self.text_font.render(self.text, True, "RED")
+                
                 return self.text
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
