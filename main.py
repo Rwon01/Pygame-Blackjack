@@ -9,14 +9,40 @@ from Blackjack import *
 
 def convertToCardImage(card):
     cardpath = f"assets/cardsSet/{card.value}_of_{card.suit}.png".lower()
-
-    card = Card(position=[random.randint(0, SCREEN_WIDTH), SCREEN_HEIGHT//2], imageDirectory=cardpath)
+    card = Card(imageDirectory=cardpath)
     return card
 
+def killSprites(spriteGroup):
+        for sprite in spriteGroup:
+            sprite.kill()
+
+def discardHand(hand, isPlayer):
+    blackjack.discard_pile.add(hand.empty(return_cards=True))
+    if isPlayer:
+        killSprites(cardGroupPlayer)
+    elif not isPlayer:
+        killSprites(cardGroupDealer)
+
+def renderCards(hand, isPlayer):
+    index = 0
+    if isPlayer: killSprites(cardGroupPlayer)
+    elif not isPlayer: killSprites(cardGroupDealer)
+
+    for everycard in hand:
+        
+        d = convertToCardImage(everycard)
+        if isPlayer:
+            d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 500])
+            cardGroupPlayer.add(d)
+        elif not isPlayer:
+            d.isHidden = True
+            d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 800])
+            cardGroupDealer.add(d)
+
+        index += 1
 
 #BOILERPLATE FOR PYGAME
 pygame.init()
-
 os.environ['SDL_VIDEO_CENTER'] = '1'
 info = pygame.display.Info()
 SCREEN_WIDTH, SCREEN_HEIGHT = info.current_w, info.current_h
@@ -25,8 +51,11 @@ pygame.display.set_caption("Blackjack Game")
 clock = pygame.time.Clock()
 
 #CREATE INSTANCES 
+card_for_width = Card()
 blackjack = Blackjack(AMOUNT_OF_DECKS)
 playerHand = pydealer.Stack()
+dealerHand = pydealer.Stack()
+
 
 #CREATE BUTTON
 btnHit = Button(text="HIT")
@@ -42,6 +71,9 @@ remCard = pygame.font.SysFont("Arial Black", 18)
 
 #GUI CONST
 POS_X = SCREEN_WIDTH * 0.50 - btnDouble.rect.w // 2
+CARD_X = SCREEN_WIDTH * 0.20 - 20 // 2
+card_size = card_for_width.rect.w + card_for_width.rect.w * 0.15
+
 rect_size = btnDouble.rect.w
 #GUI
 btnHit.move([POS_X - 2 * rect_size , SCREEN_HEIGHT - 200])
@@ -52,7 +84,8 @@ btnSurrender.move([POS_X + 2* rect_size, SCREEN_HEIGHT - 200])
 btnDeal.move([100, 100])
 
 buttonGroup = pygame.sprite.Group()
-cardGroup = pygame.sprite.Group()
+cardGroupPlayer = pygame.sprite.Group()
+cardGroupDealer = pygame.sprite.Group()
 buttonGroup.add(btnStand)
 buttonGroup.add(btnHit)
 buttonGroup.add(btnDouble)
@@ -78,31 +111,34 @@ while run:
 
         if test_value == "DEAL": 
             playerHand.add(blackjack.dealCard(2))
-            print(blackjack.getHandTotal(playerHand))
-            
+            dealerHand.add(blackjack.dealCard(2))
+            renderCards(playerHand, isPlayer=True)
+            renderCards(dealerHand, isPlayer=False)
+                      
         if test_value == "HIT":
-            playerHand.add(blackjack.dealCard(1))
+            if blackjack.getHandTotal(playerHand) <= 21:
+                playerHand.add(blackjack.dealCard(1))
+                renderCards(playerHand, isPlayer=True)
+            else:
+                print('GOING OVER 21')
         
         if test_value == 'STAND':
-            blackjack.pile.add(playerHand.empty(return_cards=True))
+            discardHand(playerHand, isPlayer=True)
             blackjack.pile.shuffle()
         if test_value == 'DOUBLE':
-            for everycard in playerHand:
-                d = convertToCardImage(everycard)
-                cardGroup.add(d)
-
+            pass
         button.render(screen)
 
 
-    for visible_card in cardGroup:
+    for visible_card in cardGroupPlayer:
+        visible_card.render(screen)
+    for visible_card in cardGroupDealer:
         visible_card.render(screen)
 
-    remainingCards = remCard.render(str(len(blackjack.pile)), True, 'Black')
-    handTotal = remCard.render(str(blackjack.getHandTotal(playerHand)), True, 'Black')
-    handValues = remCard.render(str(playerHand), True, 'Black')
+    remainingCards = remCard.render("Remaining cards: " + str(len(blackjack.pile)), True, 'Black')
+    handTotal = remCard.render("Your hand total is: " + str(blackjack.getHandTotal(playerHand)), True, 'Black')
     screen.blit(remainingCards, [100, 300])
     screen.blit(handTotal, [100, 400])
-    screen.blit(handValues, [100, 500])
 
     #UPDATE DISPLAY -- KEEP LAST
     pygame.display.flip()
