@@ -1,3 +1,4 @@
+import pydealer.stack
 import pygame
 import pydealer
 
@@ -15,6 +16,7 @@ class Blackjack():
         #Create deck pile
         self.pile = pydealer.Stack()
         single_deck = pydealer.Deck()
+        self.discard_pile = pydealer.Stack()
         for i in range(self.amount_of_decks):
             self.pile.add(single_deck)
             self.pile.shuffle()

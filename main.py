@@ -6,13 +6,12 @@ from settings import *
 from Button import Button
 from Blackjack import *
 
-def getCardFiles():
-    CARDS_PATH = list()
-    for path in os.listdir('assets\cardsSet'):
-        cardpath = "assets/cardsSet/" + path
-        CARDS_PATH.append(cardpath)
 
-    return CARDS_PATH
+def convertToCardImage(card):
+    cardpath = f"assets/cardsSet/{card.value}_of_{card.suit}.png".lower()
+
+    card = Card(position=[random.randint(0, SCREEN_WIDTH), SCREEN_HEIGHT//2], imageDirectory=cardpath)
+    return card
 
 
 #BOILERPLATE FOR PYGAME
@@ -53,6 +52,7 @@ btnSurrender.move([POS_X + 2* rect_size, SCREEN_HEIGHT - 200])
 btnDeal.move([100, 100])
 
 buttonGroup = pygame.sprite.Group()
+cardGroup = pygame.sprite.Group()
 buttonGroup.add(btnStand)
 buttonGroup.add(btnHit)
 buttonGroup.add(btnDouble)
@@ -86,9 +86,16 @@ while run:
         if test_value == 'STAND':
             blackjack.pile.add(playerHand.empty(return_cards=True))
             blackjack.pile.shuffle()
-
+        if test_value == 'DOUBLE':
+            for everycard in playerHand:
+                d = convertToCardImage(everycard)
+                cardGroup.add(d)
 
         button.render(screen)
+
+
+    for visible_card in cardGroup:
+        visible_card.render(screen)
 
     remainingCards = remCard.render(str(len(blackjack.pile)), True, 'Black')
     handTotal = remCard.render(str(blackjack.getHandTotal(playerHand)), True, 'Black')
