@@ -6,6 +6,7 @@ class Card(pygame.sprite.Sprite):
     
     def __init__(self, position=[SCREEN_WIDTH//2,SCREEN_HEIGHT//2], imageDirectory="assets/jokerSet/black_joker.png", cardValue = 0):
         super().__init__()
+        self.pyCard = None
         self.cardValue = cardValue
         self.position = position
         self.image = pygame.image.load(imageDirectory).convert_alpha()

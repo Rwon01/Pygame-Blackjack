@@ -10,6 +10,7 @@ from Blackjack import *
 def convertToCardImage(card):
     cardpath = f"assets/cardsSet/{card.value}_of_{card.suit}.png".lower()
     card = Card(imageDirectory=cardpath)
+    card.pyCard = card
     return card
 
 def killSprites(spriteGroup):
@@ -29,17 +30,21 @@ def renderCards(hand, isPlayer):
     elif not isPlayer: killSprites(cardGroupDealer)
 
     for everycard in hand:
-        
+
         d = convertToCardImage(everycard)
         if isPlayer:
             d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 500])
             cardGroupPlayer.add(d)
         elif not isPlayer:
-            d.isHidden = True
+            if index == 0: d.isHidden = True
             d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 800])
             cardGroupDealer.add(d)
-
         index += 1
+
+def dealerMove():
+    index = 0
+    for card in cardGroupDealer:
+        if index == 0 : card.isHidden = True
 
 #BOILERPLATE FOR PYGAME
 pygame.init()
@@ -126,7 +131,7 @@ while run:
             discardHand(playerHand, isPlayer=True)
             blackjack.pile.shuffle()
         if test_value == 'DOUBLE':
-            pass
+            dealerMove()
         button.render(screen)
 
 
