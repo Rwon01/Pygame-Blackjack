@@ -2,31 +2,29 @@ import pygame
 from settings import *
 import os
 
+
 class Card(pygame.sprite.Sprite):
-    
-    def __init__(self, position=[SCREEN_WIDTH//2,SCREEN_HEIGHT//2], imageDirectory="assets/jokerSet/black_joker.png", cardValue = 0):
+
+    card_group = pygame.sprite.Group()
+
+    def __init__(self, position=[0,0], imageDirectory="assets/jokerSet/black_joker.png", is_hidden = False):
         super().__init__()
-        self.pyCard = None
-        self.cardValue = cardValue
-        self.position = position
+        self.card_group.add(self)
         self.image = pygame.image.load(imageDirectory).convert_alpha()
         self.hiddenImage = pygame.image.load("assets/card_back.png").convert_alpha()
         self.hiddenImageScaled = pygame.transform.scale(self.hiddenImage, (self.hiddenImage.get_width() * CARD_SCALE_FACTOR, self.hiddenImage.get_height() * CARD_SCALE_FACTOR))
         self.imageScaled = pygame.transform.scale(self.image, (self.image.get_width() * CARD_SCALE_FACTOR, self.image.get_height() * CARD_SCALE_FACTOR))
-        self.rect = self.imageScaled.get_rect(x = self.position[0], y = self.position[1])
-        self.isHidden = False
+        self.rect = self.imageScaled.get_rect()
+        self.rect.center = position
+        self.is_hidden = is_hidden
 
     def move(self, newPos):
-        self.position = newPos
-        self.rect.topleft = self.position
+        self.rect.center = newPos
     
-    def getPos(self):
-        return self.position
-
     def render(self, surface):
-        if not self.isHidden:
-            surface.blit(self.imageScaled, self.position)
-        elif self.isHidden:
-            surface.blit(self.hiddenImageScaled, self.position)
+        if not self.is_hidden:
+            surface.blit(self.imageScaled, self.rect.topleft)
+        elif self.is_hidden:
+            surface.blit(self.hiddenImageScaled, self.rect.center)
 
     

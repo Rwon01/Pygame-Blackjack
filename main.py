@@ -5,46 +5,9 @@ from Card import Card
 from settings import *
 from Button import Button
 from Blackjack import *
-
-
-def convertToCardImage(card):
-    cardpath = f"assets/cardsSet/{card.value}_of_{card.suit}.png".lower()
-    card = Card(imageDirectory=cardpath)
-    card.pyCard = card
-    return card
-
-def killSprites(spriteGroup):
-        for sprite in spriteGroup:
-            sprite.kill()
-
-def discardHand(hand, isPlayer):
-    blackjack.discard_pile.add(hand.empty(return_cards=True))
-    if isPlayer:
-        killSprites(cardGroupPlayer)
-    elif not isPlayer:
-        killSprites(cardGroupDealer)
-
-def renderCards(hand, isPlayer):
-    index = 0
-    if isPlayer: killSprites(cardGroupPlayer)
-    elif not isPlayer: killSprites(cardGroupDealer)
-
-    for everycard in hand:
-
-        d = convertToCardImage(everycard)
-        if isPlayer:
-            d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 500])
-            cardGroupPlayer.add(d)
-        elif not isPlayer:
-            if index == 0: d.isHidden = True
-            d.move([CARD_X + (index * card_size), SCREEN_HEIGHT - 800])
-            cardGroupDealer.add(d)
-        index += 1
-
-def dealerMove():
-    index = 0
-    for card in cardGroupDealer:
-        if index == 0 : card.isHidden = True
+import time
+from renderText import Text
+from Player import Player
 
 #BOILERPLATE FOR PYGAME
 pygame.init()
@@ -58,10 +21,11 @@ clock = pygame.time.Clock()
 #CREATE INSTANCES 
 card_for_width = Card()
 blackjack = Blackjack(AMOUNT_OF_DECKS)
-playerHand = pydealer.Stack()
-dealerHand = pydealer.Stack()
+player = Player(hand=pydealer.Stack(), starting_position=[SCREEN_WIDTH*0.25, 500])
+dealer = Player(hand=pydealer.Stack(), starting_position=[SCREEN_WIDTH*0.25, 150])
 
-
+#GROUPS
+textGroup = pygame.sprite.Group()
 #CREATE BUTTON
 btnHit = Button(text="HIT")
 btnStand = Button(text="STAND")
@@ -71,15 +35,15 @@ btnSurrender = Button(text="SURRENDER", text_size=18)
 btnDeal = Button(text="DEAL", text_size=32)
 
 #TEXT
-remCard = pygame.font.SysFont("Arial Black", 18)
-
+hand_count = Text(str(player.get_hand_value()), position=[SCREEN_WIDTH*0.2, SCREEN_HEIGHT-100], color='Black', fontSize=18)
+Remaining_count = Text("Remaining cards: " + str(blackjack.pile.size), position=[SCREEN_WIDTH*0.5, SCREEN_HEIGHT-100], color='Black', fontSize=18)
+test = Text("BUST", [SCREEN_WIDTH*0.10, 500], 'Red', 50)
 
 #GUI CONST
-POS_X = SCREEN_WIDTH * 0.50 - btnDouble.rect.w // 2
+POS_X = SCREEN_WIDTH * 0.50
 CARD_X = SCREEN_WIDTH * 0.20 - 20 // 2
 card_size = card_for_width.rect.w + card_for_width.rect.w * 0.15
-
-rect_size = btnDouble.rect.w
+rect_size = btnDouble.rect.w + 30
 #GUI
 btnHit.move([POS_X - 2 * rect_size , SCREEN_HEIGHT - 200])
 btnStand.move([POS_X - 1 * rect_size, SCREEN_HEIGHT - 200])
@@ -88,62 +52,52 @@ btnSplit.move([POS_X + 1 * rect_size, SCREEN_HEIGHT - 200])
 btnSurrender.move([POS_X + 2* rect_size, SCREEN_HEIGHT - 200])
 btnDeal.move([100, 100])
 
-buttonGroup = pygame.sprite.Group()
-cardGroupPlayer = pygame.sprite.Group()
-cardGroupDealer = pygame.sprite.Group()
-buttonGroup.add(btnStand)
-buttonGroup.add(btnHit)
-buttonGroup.add(btnDouble)
-buttonGroup.add(btnSplit)
-buttonGroup.add(btnSurrender)
-buttonGroup.add(btnDeal)
-
-
-
+message_end_time = 0
 #GAMELOOP
 run = True
 while run:
 
+    current_time = pygame.time.get_ticks()
     clock.tick(FPS)
     #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
     #BACKGROUND
     screen.fill("dark gray")
-    
-    #BUTTON LOOP
-    for button in buttonGroup:
-        test_value = button.onClick()
+   
+    for card_instance in Card.card_group:
+        card_instance.render(screen)
 
-        if test_value == "DEAL": 
-            playerHand.add(blackjack.dealCard(2))
-            dealerHand.add(blackjack.dealCard(2))
-            renderCards(playerHand, isPlayer=True)
-            renderCards(dealerHand, isPlayer=False)
-                      
+    #BUTTON LOOP
+    for button in Button.button_group:
+        test_value = button.is_clicked()
+        if test_value == "DEAL":
+            for _ in range(2):
+                player.hit(blackjack.pile)
+                dealer.hit(blackjack.pile)
         if test_value == "HIT":
-            if blackjack.getHandTotal(playerHand) <= 21:
-                playerHand.add(blackjack.dealCard(1))
-                renderCards(playerHand, isPlayer=True)
-            else:
-                print('GOING OVER 21')
-        
-        if test_value == 'STAND':
-            discardHand(playerHand, isPlayer=True)
-            blackjack.pile.shuffle()
-        if test_value == 'DOUBLE':
-            dealerMove()
+            player.hit(blackjack.pile)
+        if test_value == "STAND":
+            player.has_busted = True
+
+        if test_value == "DOUBLE":
+            pass
+
         button.render(screen)
 
+    hand_count.text = "Your hand value: " + str(player.get_hand_value())
+    Remaining_count.text = ("Remaining cards: " + str(blackjack.pile.size))
+    hand_count.render(screen)
+    Remaining_count.render(screen)
 
-    for visible_card in cardGroupPlayer:
-        visible_card.render(screen)
-    for visible_card in cardGroupDealer:
-        visible_card.render(screen)
+    start_time = pygame.time.get_ticks()
+    if player.has_busted:
+        player.has_busted = False
+        message_end_time = pygame.time.get_ticks() + 2000 # display for 3 seconds
+        player.end_round(blackjack)
+        dealer.end_round(blackjack)
 
-    remainingCards = remCard.render("Remaining cards: " + str(len(blackjack.pile)), True, 'Black')
-    handTotal = remCard.render("Your hand total is: " + str(blackjack.getHandTotal(playerHand)), True, 'Black')
-    screen.blit(remainingCards, [100, 300])
-    screen.blit(handTotal, [100, 400])
+    if current_time < message_end_time:
+        test.render(screen)
 
     #UPDATE DISPLAY -- KEEP LAST
     pygame.display.flip()
@@ -152,5 +106,6 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
             
 pygame.quit()
