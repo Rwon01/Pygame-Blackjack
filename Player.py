@@ -17,12 +17,9 @@ class Player():
 
     def add_card(self):
         self.hand.add(Blackjack.pile.deal(1))
-        self.render_cards()
 
-    def end_round(self):
-        Blackjack.discard_pile.add(self.hand.empty())
-        for sprite in Card.card_group:
-            sprite.kill()
+    def empty_hand(self):
+        Blackjack.pile.add(self.hand.empty(return_cards=True))
 
     def get_hand_value(self):
         runningTotal = 0
@@ -44,15 +41,6 @@ class Player():
         self.hand_value = runningTotal
         return runningTotal
     
-    def convert_to_card_sprite(self, card, is_hidden = False):
-        cardpath = f"assets/cardsSet/{card.value}_of_{card.suit}.png".lower()
-        card = Card(imageDirectory=cardpath, is_hidden=is_hidden)
-        return card
 
-    def render_cards(self):
-        index = 0
-        for card in self.hand:
-            card_sprite = self.convert_to_card_sprite(card, False)
-            size = card_sprite.rect.w + 15
-            card_sprite.move([self.starting_position[0] + size * index, self.starting_position[1]])
-            index += 1
+
+
