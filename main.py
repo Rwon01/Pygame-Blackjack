@@ -4,10 +4,16 @@ import os
 from Card import Card
 from settings import *
 from Button import Button
-from Blackjack import *
+from Blackjack import Blackjack
 import time
 from renderText import Text
 from Player import Player
+from timer import Timer
+import pydealer
+
+def end_round_all():
+    player.end_round()
+    dealer.end_round()
 
 #BOILERPLATE FOR PYGAME
 pygame.init()
@@ -20,9 +26,8 @@ clock = pygame.time.Clock()
 
 #CREATE INSTANCES 
 card_for_width = Card()
-blackjack = Blackjack(AMOUNT_OF_DECKS)
-player = Player(hand=pydealer.Stack(), starting_position=[SCREEN_WIDTH*0.25, 500])
-dealer = Player(hand=pydealer.Stack(), starting_position=[SCREEN_WIDTH*0.25, 150])
+player = Player(starting_position=[SCREEN_WIDTH*0.25, 500])
+dealer = Player(starting_position=[SCREEN_WIDTH*0.25, 150])
 
 #GROUPS
 textGroup = pygame.sprite.Group()
@@ -36,7 +41,7 @@ btnDeal = Button(text="DEAL", text_size=32)
 
 #TEXT
 hand_count = Text(str(player.get_hand_value()), position=[SCREEN_WIDTH*0.2, SCREEN_HEIGHT-100], color='Black', fontSize=18)
-Remaining_count = Text("Remaining cards: " + str(blackjack.pile.size), position=[SCREEN_WIDTH*0.5, SCREEN_HEIGHT-100], color='Black', fontSize=18)
+Remaining_count = Text("Remaining cards: " + str(Blackjack.pile.size), position=[SCREEN_WIDTH*0.5, SCREEN_HEIGHT-100], color='Black', fontSize=18)
 test = Text("BUST", [SCREEN_WIDTH*0.10, 500], 'Red', 50)
 
 #GUI CONST
@@ -52,14 +57,13 @@ btnSplit.move([POS_X + 1 * rect_size, SCREEN_HEIGHT - 200])
 btnSurrender.move([POS_X + 2* rect_size, SCREEN_HEIGHT - 200])
 btnDeal.move([100, 100])
 
-message_end_time = 0
+
 #GAMELOOP
+
+simple_timer = Timer(800, end_round_all)
 run = True
 while run:
-
-    current_time = pygame.time.get_ticks()
     clock.tick(FPS)
-    #COLLISION CHECK
     mousePos = pygame.mouse.get_pos()
     #BACKGROUND
     screen.fill("dark gray")
@@ -72,10 +76,10 @@ while run:
         test_value = button.is_clicked()
         if test_value == "DEAL":
             for _ in range(2):
-                player.hit(blackjack.pile)
-                dealer.hit(blackjack.pile)
+                player.hit()
+                dealer.hit()
         if test_value == "HIT":
-            player.hit(blackjack.pile)
+            player.hit()
         if test_value == "STAND":
             player.has_busted = True
 
@@ -85,18 +89,17 @@ while run:
         button.render(screen)
 
     hand_count.text = "Your hand value: " + str(player.get_hand_value())
-    Remaining_count.text = ("Remaining cards: " + str(blackjack.pile.size))
+    Remaining_count.text = ("Remaining cards: " + str(Blackjack.pile.size))
     hand_count.render(screen)
     Remaining_count.render(screen)
 
-    start_time = pygame.time.get_ticks()
-    if player.has_busted:
-        player.has_busted = False
-        message_end_time = pygame.time.get_ticks() + 2000 # display for 3 seconds
-        player.end_round(blackjack)
-        dealer.end_round(blackjack)
+    simple_timer.update()
 
-    if current_time < message_end_time:
+    if player.has_busted:
+        simple_timer.activate()
+        player.has_busted = False
+
+    if simple_timer.active:
         test.render(screen)
 
     #UPDATE DISPLAY -- KEEP LAST

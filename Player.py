@@ -1,7 +1,7 @@
+import pydealer.stack
 import pygame
-import pydealer
 from Card import Card
-
+from Blackjack import Blackjack
 
 FACE_CARDS = ['Jack', 'Queen', 'King']
 MAX_VALUE = 21
@@ -10,12 +10,12 @@ class Player():
 
     def __init__(self, starting_position=[0,0], hand=None, hand_value=None):
         self.starting_position = starting_position
-        self.hand = hand
+        self.hand = pydealer.Stack()
         self.hand_value = hand_value
         self.has_busted = False
 
-    def hit(self, pile):
-        self.hand.add(pile.deal(1))
+    def hit(self):
+        self.hand.add(Blackjack.pile.deal(1))
         self.render_cards()
         if self.get_hand_value() > 21:
             self.has_busted = True
@@ -26,13 +26,18 @@ class Player():
     def double(self):
         #TODO
         pass
+    
+    def dealer_move(self):
+        if self.hand.size == 2 and self.get_hand_value() == 21:
+            return
 
-    def end_round(self, blackjack):
-        blackjack.discard_pile.add(self.hand.empty())
+
+
+
+    def end_round(self):
+        Blackjack.discard_pile.add(self.hand.empty())
         for sprite in Card.card_group:
             sprite.kill()
-
-
 
     def get_hand_value(self):
         

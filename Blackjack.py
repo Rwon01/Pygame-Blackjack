@@ -1,21 +1,21 @@
 import pydealer.stack
 import pygame
-import pydealer
-from Player import Player
+from settings import *
 
 
 class Blackjack():
-
-# DeckSize, 
-    def __init__(self, amount_of_decks):
-        self.amount_of_decks = amount_of_decks
-        #Create deck pile
-        self.pile = pydealer.Stack()
-        single_deck = pydealer.Deck()
-        self.discard_pile = pydealer.Stack()
-        for i in range(self.amount_of_decks):
-            self.pile.add(single_deck)
-            self.pile.shuffle()      
     
-def play_round():
-    pass
+    amount_of_decks = AMOUNT_OF_DECKS
+    #Create deck pile
+    pile = pydealer.Stack()
+    single_deck = pydealer.Deck()
+    discard_pile = pydealer.Stack()
+    for i in range(amount_of_decks):
+        pile.add(single_deck)
+        pile.shuffle()   
+
+    def __init__(self):
+        pass  
+    
+    def play_round():
+        pass
