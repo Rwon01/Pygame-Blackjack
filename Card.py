@@ -25,6 +25,6 @@ class Card(pygame.sprite.Sprite):
         if not self.is_hidden:
             surface.blit(self.imageScaled, self.rect.topleft)
         elif self.is_hidden:
-            surface.blit(self.hiddenImageScaled, self.rect.center)
+            surface.blit(self.hiddenImageScaled, self.rect.topleft)
 
     
